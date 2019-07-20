@@ -14,10 +14,8 @@ const long utcOffsetInSeconds = 19800;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
-int flag=0;
-int name1=1;
 String formattedDate;
-String dayStamp;
+String dayStamp;//----------------
 void setup() {
   Serial.begin(9600);
   delay(2000);                
@@ -35,14 +33,9 @@ void setup() {
   Serial.print("IP Address is : ");
   Serial.println(WiFi.localIP());                                           
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);   
-  flag=1;
-  Serial.println(flag);                          
 }
-int temp=0;
 
 void loop() { 
-  if(flag==1)
-  {  
     timeClient.update();
 //    Serial.print(daysOfTheWeek[timeClient.getDay()]);
 //    Serial.print(", ");
@@ -51,7 +44,7 @@ void loop() {
 //    Serial.print(timeClient.getMinutes());
 //    Serial.print(":");
 //    Serial.println(timeClient.getSeconds()); 
-    formattedDate = timeClient.getFormattedDate();
+//    formattedDate = timeClient.getFormattedDate();
     int splitT = formattedDate.indexOf("T");
     dayStamp = formattedDate.substring(0, splitT);
     Serial.println(dayStamp);
@@ -59,15 +52,10 @@ void loop() {
     String min1=(String)timeClient.getMinutes();
     String time1=(String)timeClient.getHours()+":"+(String)timeClient.getMinutes()+":"+(String)timeClient.getSeconds();
     Serial.println(time1);
-     String name=(String)name1;
-     name1++; 
-     temp=temp+1;
      int moisture_value=analogRead(moisture_pin);
      Serial.println(moisture_value);
      String moisture = String(moisture_value);
-     String temp1=String(temp);
-     //Firebase.pushString("/MS/Humidity", temp1);                                      
-     name=Firebase.pushString("/Moisture/"+hrs+"/"+min1, moisture);                             
+     Firebase.pushString("/Moisture/"+hrs+"/"+min1, moisture);                             
      
      if(Firebase.failed())
      {
@@ -77,6 +65,6 @@ void loop() {
      {
       Serial.println("Success"); 
      }
-     delay(60000);
-  }
+     delay(15000);
+  
 }

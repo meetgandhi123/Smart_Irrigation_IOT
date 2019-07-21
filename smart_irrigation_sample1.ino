@@ -16,9 +16,13 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 String formattedDate;
 String dayStamp;//----------------
+
+const int relay1 = 5;
+
 void setup() {
   Serial.begin(9600);
   delay(2000);                
+  
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);                                     
   Serial.print("Connecting to ");
   Serial.print(WIFI_SSID);
@@ -31,40 +35,75 @@ void setup() {
   Serial.print("Connected to ");
   Serial.println(WIFI_SSID);
   Serial.print("IP Address is : ");
-  Serial.println(WiFi.localIP());                                           
+  Serial.println(WiFi.localIP());
+  pinMode(relay1, OUTPUT);
+  //digitalWrite(relay1, LOW);                                           
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);   
 }
 
+const int index_moisture_dry= 500;
+const int index_moisture_humid=370;
+
 void loop() { 
     timeClient.update();
-//    Serial.print(daysOfTheWeek[timeClient.getDay()]);
-//    Serial.print(", ");
-//    Serial.print(timeClient.getHours());
-//    Serial.print(":");
-//    Serial.print(timeClient.getMinutes());
-//    Serial.print(":");
-//    Serial.println(timeClient.getSeconds()); 
-//    formattedDate = timeClient.getFormattedDate();
+   
+    formattedDate =(String)timeClient.getFormattedDate();
     int splitT = formattedDate.indexOf("T");
     dayStamp = formattedDate.substring(0, splitT);
     Serial.println(dayStamp);
+    
     String hrs=(String)timeClient.getHours();
     String min1=(String)timeClient.getMinutes();
     String time1=(String)timeClient.getHours()+":"+(String)timeClient.getMinutes()+":"+(String)timeClient.getSeconds();
-    Serial.println(time1);
-     int moisture_value=analogRead(moisture_pin);
-     Serial.println(moisture_value);
-     String moisture = String(moisture_value);
-     Firebase.pushString("/Moisture/"+hrs+"/"+min1, moisture);                             
+    Serial.println("time 1"+time1);
      
-     if(Firebase.failed())
-     {
-     Serial.println("Failed"); 
-     }
-     else
-     {
+    int moisture_value=analogRead(moisture_pin);         // moisture value extract 
+    Serial.println(moisture_value);
+    String moisture = String(moisture_value);
+
+    
+    Firebase.pushString("/"+dayStamp+"/Moisture/"+hrs+"/"+min1, moisture);                           
+    if(Firebase.failed())
+    {
+      Serial.println("Failed"); 
+    }
+    else
+    {
       Serial.println("Success"); 
-     }
-     delay(15000);
-  
+    }
+    
+    //relay sturcture
+    
+    if(moisture_value >= index_moisture_dry)
+    {
+      int temp=moisture_value;
+      int n=5;
+      time1=time1+"ON";
+      Firebase.pushString("/"+dayStamp+"/logs", time1);
+      if(Firebase.failed())
+      {
+        Serial.println("log not created!!!");
+      }
+      else{
+        Serial.println("log created!!!");
+      }
+      while(temp>=index_moisture_dry)
+      {
+        digitalWrite(relay1, LOW);
+        temp=analogRead(moisture_pin);
+        if(n>=0)
+        {
+          n--;
+          delay(1000);
+        }
+        else{
+          break;
+        }
+        delay(4000);
+      }
+      digitalWrite(relay1, HIGH);
+    }
+    //relay end
+   
+    delay(30000);
 }

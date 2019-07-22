@@ -13,5 +13,5 @@
   2)ESP8266WIFI
   3)FirebaseArduino
   4)Arduino master
-  5)NTPCLIENT
+  5)NTPCLIENT(https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/)
   

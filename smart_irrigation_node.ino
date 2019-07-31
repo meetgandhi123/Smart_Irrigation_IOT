@@ -34,10 +34,16 @@ void setup() {
   Serial.println(WiFi.localIP());                                     
   Firebase.begin(firebase_host, firebase_auth);                             //connection with firebase is begin here
 }
+void reset_fun()
+{
+  Serial.println("Resetting the controller.....");
+  ESP.restart();
+}
 
  
 String formattedDate;                                                     
 String dayStamp;
+int mcu_reset;
 
 void loop() {
 
@@ -52,17 +58,30 @@ void loop() {
     String min1=(String)timeClient.getMinutes();
     String time1=(String)timeClient.getHours()+":"+(String)timeClient.getMinutes()+":"+(String)timeClient.getSeconds();
     Serial.println(time1);
-
+    mcu_reset=Firebase.getInt("RESET_NODES/RESET_NODE1");
+    Serial.println(mcu_reset);
+    if(mcu_reset==1)
+    {
+      Firebase.setInt("RESET_NODES/RESET_NODE1",0);
+      reset_fun();
+    }
     //block of moisture starts here
      
     int moisture_value=analogRead(moisture_pin);         // moisture value extract 
     Serial.println(moisture_value);
-    String moisture = String(moisture_value);
 
     //block of moisture ends here
 
      //firebase upload of the soil moisture data starts here
-    Firebase.setString("/"+dayStamp+"/node1"+"/Moisture/"+time1, moisture);
+    Firebase.setInt("/node1/"+dayStamp+"/Moisture/"+time1, moisture_value);
+    Firebase.setInt("/node1/temp",moisture_value);
+    if(Firebase.failed())
+    {
+      Serial.println("Failed!!!");
+    }
+    else{
+      Serial.println("success");
+      }
    /* Firebase.pushString("/"+dayStamp+"/node1"+"/Moisture/"+hrs+"/"+min1, moisture);                           
     if(Firebase.failed())
     {

@@ -1,6 +1,8 @@
 # Smart Irrigation IOT
+> Create an IOT based product for smart irrigation, were wemos mini are used as slaves which collece data from different sector's or lang and send data to node mcu. where it is been sent to firebase database for further processing. On processing node mcu calculated the parameters like humidity, temperature and send water to perticular part of the land. Thus optimizing the cost for irrigation.
 # board used 
-  Using node mcu as master, and wemos mini as slave.
+  1) Using node mcu as master
+  2) wemos mini as slave.
 # sensor 
   1)capacitve soil moisture sensor
   2)temperature and humidity sensor

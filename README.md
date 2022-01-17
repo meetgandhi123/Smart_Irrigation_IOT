@@ -1,6 +1,6 @@
 # Smart Irrigation IOT
 # board used 
-  node mcu
+  Using node mcu as master, and wemos mini as slave.
 # sensor 
   1)capacitve soil moisture sensor
   2)temperature and humidity sensor
